@@ -27,8 +27,6 @@ pub fn process(input: &str) -> i32 {
             .map(|x| String::from(x.trim()))
             .collect();
 
-        let number_of_rounds = rounds.len();
-
         for round in &rounds {
             let mut colors: Vec<(usize, String)> = Vec::new();
 
@@ -38,9 +36,7 @@ pub fn process(input: &str) -> i32 {
             }
 
             let numbers: Vec<i32> = round.split_whitespace().map(|x| x.parse::<i32>()).filter(|x| x.is_ok()).map(|x| x.unwrap()).collect();
-
-            // print!("{:?}", numbers);
-
+            
             colors.sort_by(|a, b| a.0.cmp(&b.0));
 
             let red_cube_index = colors.iter().position(|x| x.1 == "red");
