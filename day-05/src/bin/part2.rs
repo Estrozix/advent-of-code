@@ -1,3 +1,8 @@
+use std::{
+    sync::{Arc, Mutex},
+    thread::{self, JoinHandle},
+};
+
 fn main() {
     let input = include_str!("input.txt");
 
@@ -81,28 +86,51 @@ pub fn process(input: &str) -> usize {
         actual_seeds.push((seeds[i], seeds[i + 1]));
     }
 
-    let mut min_location = i64::MAX;
+    let g_min_location = Arc::new(Mutex::new(i64::MAX));
+    let safe_categories = Arc::new(categories);
 
-    let mut i = 0;
+    let mut threads: Vec<JoinHandle<_>> = Vec::new();
 
     for seed_g in actual_seeds {
-        i += 1;
-        for seed_number in seed_g.0..seed_g.0 + seed_g.1 {
-            let source = seed_number;
+        let p_safe_categories = safe_categories.clone();
+        let p_min_location = g_min_location.clone();
 
-            let location = find_location(source, &categories);
-
-            // println!("Seed {} ended up in {}", seed_number, location);
-            
-            if location < min_location {
-                min_location = location;
+        threads.push(thread::spawn(move || {
+            let min_location = process_group(seed_g, p_safe_categories);
+            {
+                let mut guard = p_min_location.lock().unwrap();
+                if min_location < *guard {
+                    *guard = min_location;
+                }
             }
-        }
-
-        println!("Seed group: {} done!", i);
+        }));
     }
 
-    return min_location as usize;
+    for thread in threads {
+        thread.join().unwrap();
+    }
+
+    let guard = g_min_location.lock().unwrap();
+
+    return *guard as usize;
+}
+
+pub fn process_group(seed_g: (i64, i64), categories: std::sync::Arc<Vec<Category>>) -> i64 {
+    let mut min_location = i64::MAX;
+
+    for seed_number in seed_g.0..seed_g.0 + seed_g.1 {
+        let source = seed_number;
+
+        let location = find_location(source, &categories);
+
+        // println!("Seed {} ended up in {}", seed_number, location);
+
+        if location < min_location {
+            min_location = location;
+        }
+    }
+
+    min_location
 }
 
 pub fn find_location(source: i64, categories: &Vec<Category>) -> i64 {
@@ -112,8 +140,11 @@ pub fn find_location(source: i64, categories: &Vec<Category>) -> i64 {
 
         for range in &category.ranges {
             // if in range
-            if (source as usize) >= range.start_source && (source as usize) < range.start_source + range.length {
-                destination = (source as i64 - range.start_source as i64) + range.start_destination as i64;
+            if (source as usize) >= range.start_source
+                && (source as usize) < range.start_source + range.length
+            {
+                destination =
+                    (source as i64 - range.start_source as i64) + range.start_destination as i64;
             }
         }
 
