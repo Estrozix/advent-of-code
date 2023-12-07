@@ -75,10 +75,7 @@ pub fn process(input: &str) -> usize {
 }
 
 fn get_win_type(a: &Hand) -> WinType {
-    let count_map = a.cards.chars().fold(HashMap::new(), |mut map, val| {
-        map.entry(val).and_modify(|frq| *frq += 1).or_insert(1);
-        map
-    });
+    let count_map = a.counts.clone().unwrap();
 
     let num_jokers = *count_map.get(&'J').unwrap_or(&0);
 
