@@ -76,6 +76,6 @@ pub mod tests {
     pub fn test_process() {
         let input = include_str!("./test_input.txt");
 
-        assert_eq!(process(input), 114);
+        assert_eq!(process(input), 2);
     }
 }
