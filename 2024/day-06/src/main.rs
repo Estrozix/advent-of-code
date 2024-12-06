@@ -32,8 +32,8 @@ fn main() {
         })
         .expect("Starting position not found!");
 
-    // solve_part1(&map_arr, starting_pos, &mut visited_map);
-    solve_part2(&map_arr, starting_pos);
+    solve_part1(&map_arr, starting_pos, &mut visited_map);
+    // solve_part2(&map_arr, starting_pos);
 }
 
 fn solve_part2(original_map: &Vec<Vec<char>>, starting_pos: (i32, i32)) {
@@ -117,13 +117,15 @@ fn solve_part1(
     while inside {
         visited_map[pos.1 as usize][pos.0 as usize] = 1;
 
-        let in_front = (pos.0 + direction.0, pos.1 + direction.1);
+        let mut in_front = (pos.0 + direction.0, pos.1 + direction.1);
 
         if check_if_inside(&map_arr, in_front) {
-            let object = map_arr[in_front.1 as usize][in_front.0 as usize];
+            let mut object = map_arr[in_front.1 as usize][in_front.0 as usize];
 
-            if object == '#' {
+            while object == '#' {
                 direction = rotate_dir(direction);
+                in_front = (pos.0 + direction.0, pos.1 + direction.1);
+                object = map_arr[in_front.1 as usize][in_front.0 as usize];
             }
         }
 
