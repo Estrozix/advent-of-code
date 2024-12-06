@@ -1,4 +1,4 @@
-use std::fs::read_to_string;
+use std::{fs::read_to_string, time::Instant};
 
 struct HistoryEntry {
     pos: (i32, i32),
@@ -6,6 +6,8 @@ struct HistoryEntry {
 }
 
 fn main() {
+    let now = Instant::now();
+
     let input = read_to_string("input.txt").unwrap();
 
     let map_arr: Vec<Vec<char>> = input
@@ -34,6 +36,9 @@ fn main() {
 
     solve_part1(&map_arr, starting_pos, &mut visited_map);
     solve_part2(&map_arr, starting_pos, &mut visited_map);
+
+    let elapsed = now.elapsed();
+    println!("Took {:.2?}", elapsed);
 }
 
 fn solve_part2(
@@ -111,7 +116,7 @@ fn solve_part2(
             }
         }
     }
-    println!("Total of {:?} options", options);
+    println!("Total options: {:?}", options);
 }
 
 fn solve_part1(
