@@ -33,15 +33,26 @@ fn main() {
         .expect("Starting position not found!");
 
     solve_part1(&map_arr, starting_pos, &mut visited_map);
-    // solve_part2(&map_arr, starting_pos);
+    solve_part2(&map_arr, starting_pos, &mut visited_map);
 }
 
-fn solve_part2(original_map: &Vec<Vec<char>>, starting_pos: (i32, i32)) {
+fn solve_part2(
+    original_map: &Vec<Vec<char>>,
+    starting_pos: (i32, i32),
+    visited_map: &mut Vec<Vec<i32>>,
+) {
     let mut options = 0;
 
     for y in 0..original_map.len() {
         for x in 0..original_map[y].len() {
             if original_map[y][x] != '.' {
+                continue;
+            }
+
+            // Performance improvement: We only need to check placements on the visited
+            // tiles from part1, since we only place one obstacle, and other placements
+            // won't affect the path.
+            if visited_map[y][x] == 0 {
                 continue;
             }
 
