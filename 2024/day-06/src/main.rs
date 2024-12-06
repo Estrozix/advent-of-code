@@ -76,27 +76,27 @@ fn solve_part2(
                         direction = rotate_dir(direction);
                         in_front = (pos.0 + direction.0, pos.1 + direction.1);
                         object = map_arr[in_front.1 as usize][in_front.0 as usize];
+
+                        if history_arr
+                            .iter()
+                            .find(|entry| {
+                                if entry.pos == pos && entry.direction == direction {
+                                    return true;
+                                } else {
+                                    return false;
+                                }
+                            })
+                            .is_some()
+                        {
+                            stuck = true;
+                        }
+
+                        history_arr.push(HistoryEntry {
+                            pos: pos.clone(),
+                            direction: direction.clone(),
+                        });
                     }
                 }
-
-                if history_arr
-                    .iter()
-                    .find(|entry| {
-                        if entry.pos == pos && entry.direction == direction {
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    })
-                    .is_some()
-                {
-                    stuck = true;
-                }
-
-                history_arr.push(HistoryEntry {
-                    pos: pos.clone(),
-                    direction: direction.clone(),
-                });
 
                 let new_pos = (pos.0 + direction.0, pos.1 + direction.1);
 
@@ -107,7 +107,7 @@ fn solve_part2(
 
             if stuck {
                 options += 1;
-                println!("Placing obstacle at {:?} stucks the guard!", (x, y));
+                // println!("Placing obstacle at {:?} stucks the guard!", (x, y));
             }
         }
     }
@@ -149,8 +149,7 @@ fn solve_part1(
 
     let visited_count = visited_map.iter().flatten().fold(0, |acc, el| acc + *el);
 
-    println!("{:?}", visited_map);
-    println!("{:?}", visited_count);
+    println!("Total visited: {:?}", visited_count);
 }
 
 fn check_if_inside(map: &Vec<Vec<char>>, location: (i32, i32)) -> bool {
@@ -166,6 +165,7 @@ fn check_if_inside(map: &Vec<Vec<char>>, location: (i32, i32)) -> bool {
     return inside;
 }
 
+#[allow(dead_code)]
 fn print_map(map: &Vec<Vec<char>>) {
     for y in 0..map.len() {
         for x in 0..map[y].len() {
