@@ -55,7 +55,7 @@ fn solve_part1(data: &Vec<Row>) {
         }
     });
 
-    println!("{:?}", result);
+    println!("Part 1 sum: {:?}", result);
 }
 
 fn solve_part2(data: &Vec<Row>) {
@@ -67,11 +67,11 @@ fn solve_part2(data: &Vec<Row>) {
         }
     });
 
-    println!("{:?}", result);
+    println!("Part 2 sum: {:?}", result);
 }
 
 fn analyse_row(row: &Row, available: &[Operation]) -> bool {
-    println!("Analysing: {:?}", row);
+    // println!("Analysing: {:?}", row);
     let num_operations = row.nums.len() - 1;
 
     let results = generate_combinations(num_operations, &available);
@@ -79,6 +79,11 @@ fn analyse_row(row: &Row, available: &[Operation]) -> bool {
     for res in results {
         let mut curr_val = row.nums[0];
         for i in 0..res.len() {
+            // Optimization, if we already above the target, it cannot be valid
+            if curr_val > row.value {
+                break;
+            }
+
             match res[i] {
                 Operation::ADD => curr_val += row.nums[i + 1],
                 Operation::MULTIPLY => curr_val *= row.nums[i + 1],
