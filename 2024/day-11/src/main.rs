@@ -5,12 +5,12 @@ fn main() {
 
     let input = read_to_string("input.txt").unwrap();
 
-    let initial_stones: Vec<u64> = input
+    let initial_stones: Vec<u32> = input
         .split(" ")
         .map(|stone| {
             stone
                 .replace("\n", "")
-                .parse::<u64>()
+                .parse::<u32>()
                 .expect("Shouild parse")
         })
         .collect();
@@ -23,16 +23,12 @@ fn main() {
         count += count_splits(*stone, 75, &mut memory);
     });
 
-    println!("Splits {:?} times", count);
-    println!(
-        "So total of {:?} stones",
-        count + initial_stones.len() as u64
-    );
+    println!("Total of {:?} stones", count + initial_stones.len() as u64);
 
     println!("Took {:.2?}", timer.elapsed());
 }
 
-fn count_splits(stone: u64, depth: u32, memory: &mut HashMap<(u64, u32), u64>) -> u64 {
+fn count_splits(stone: u32, depth: u32, memory: &mut HashMap<(u32, u32), u64>) -> u64 {
     let mut value = stone;
     let mut splits = 0;
 
@@ -49,10 +45,10 @@ fn count_splits(stone: u64, depth: u32, memory: &mut HashMap<(u64, u32), u64>) -
             splits += 1;
 
             let parts = value_str.split_at(value_str.len() / 2);
-            value = parts.0.parse::<u64>().expect("parse");
+            value = parts.0.parse::<u32>().expect("parse");
 
             splits += count_splits(
-                parts.1.parse::<u64>().expect("parse"),
+                parts.1.parse::<u32>().expect("parse"),
                 depth - i - 1,
                 memory,
             );
