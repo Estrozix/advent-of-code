@@ -1,106 +1,107 @@
-use std::fs::read_to_string;
-
-#[derive(Clone)]
-struct Stone {
-    value: String,
-    next: Option<Box<Stone>>,
-}
-
-impl Stone {
-    fn append(&mut self, value: String) {
-        match self.next {
-            Some(ref mut stone) => {
-                stone.append(value);
-            }
-            None => {
-                let stone = Stone { value, next: None };
-                self.next = Some(Box::new(stone));
-            }
-        }
-    }
-
-    fn list(&self) {
-        print!("{} ", self.value);
-        match self.next {
-            Some(ref stone) => stone.list(),
-            None => println!(""),
-        }
-    }
-
-    fn count(&self) -> i64 {
-        if let Some(ref stone) = self.next {
-            return stone.count() + 1;
-        } else {
-            return 1;
-        }
-    }
-
-    fn blink(&mut self) {
-        let length = self.value.chars().count();
-
-        match &mut self.next {
-            Some(stone) => stone.blink(),
-            None => {}
-        }
-
-        if self.value == "0" {
-            self.value = "1".to_string();
-        } else if length % 2 == 0 {
-            let parts = self.value.split_at(length / 2);
-
-            let next_stone: Option<Box<Stone>>;
-
-            if let Some(stone) = &self.next {
-                next_stone = Some(stone.clone());
-            } else {
-                next_stone = None;
-            }
-
-            let new_stone = Stone {
-                value: parts
-                    .1
-                    .parse::<u64>()
-                    .expect("Should be able to parse")
-                    .to_string(),
-                next: next_stone,
-            };
-
-            self.value = parts
-                .0
-                .parse::<u64>()
-                .expect("Should be able to parse")
-                .to_string();
-            self.next = Some(Box::new(new_stone));
-        } else {
-            self.value =
-                (self.value.parse::<u64>().expect("All should be parsable") * 2024).to_string()
-        }
-    }
-}
+use std::{collections::HashMap, fs::read_to_string, time};
 
 fn main() {
-    let input = read_to_string("test.txt").unwrap();
+    let timer = time::Instant::now();
 
-    let initial_stones: Vec<String> = input
+    let input = read_to_string("input.txt").unwrap();
+
+    let initial_stones: Vec<u64> = input
         .split(" ")
-        .map(|stone| String::from(stone.replace("\n", "")))
+        .map(|stone| {
+            stone
+                .replace("\n", "")
+                .parse::<u64>()
+                .expect("Shouild parse")
+        })
         .collect();
 
-    let mut first_stone = Stone {
-        next: None,
-        value: initial_stones.first().unwrap().clone(),
-    };
+    let mut memory = HashMap::new();
 
-    for stone in initial_stones.iter().skip(1) {
-        first_stone.append(stone.clone());
-    }
+    let mut count: u64 = 0;
 
-    for _ in 0..6 {
-        first_stone.blink();
-        first_stone.list();
-    }
+    initial_stones.iter().for_each(|stone| {
+        count += count_splits(*stone, 75, &mut memory);
+    });
 
-    let num = first_stone.count();
+    println!("Splits {:?} times", count);
+    println!(
+        "So total of {:?} stones",
+        count + initial_stones.len() as u64
+    );
 
-    println!("Total num: {:?}", num);
+    println!("Took {:.2?}", timer.elapsed());
 }
+
+fn count_splits(stone: u64, depth: u32, memory: &mut HashMap<(u64, u32), u64>) -> u64 {
+    let mut value = stone;
+    let mut splits = 0;
+
+    if memory.contains_key(&(stone, depth)) {
+        return *memory.get(&(stone, depth)).expect("Already checked");
+    }
+
+    for i in 0..depth {
+        let value_str = value.to_string();
+
+        if value == 0 {
+            value = 1;
+        } else if value_str.len() % 2 == 0 {
+            splits += 1;
+
+            let parts = value_str.split_at(value_str.len() / 2);
+            value = parts.0.parse::<u64>().expect("parse");
+
+            splits += count_splits(
+                parts.1.parse::<u64>().expect("parse"),
+                depth - i - 1,
+                memory,
+            );
+        } else {
+            value = value * 2024;
+        }
+    }
+
+    memory.insert((stone, depth), splits);
+    return splits;
+}
+
+// fn explore_stone(stone: u32, depth: i32) -> u32 {
+//     if depth > 74 {
+//         return 1;
+//     }
+//
+//     if stone == 0 {
+//         return explore_stone(1, depth + 1);
+//     }
+//
+//     let len = stone.checked_ilog10().unwrap_or(0) + 1;
+//     if len % 2 == 0 {
+//         let stone_str = stone.to_string();
+//         let parts = stone_str.split_at(stone_str.len() / 2);
+//         return explore_stone(parts.0.parse::<u32>().expect("should parse"), depth + 1)
+//             + explore_stone(parts.1.parse::<u32>().expect("should parse"), depth + 1);
+//     }
+//
+//     return explore_stone(stone * 2024, depth + 1);
+// }
+//
+// fn explore_stone_old(original_stones: &Vec<u64>) -> Vec<u64> {
+//     let mut stones: Vec<u64> = Vec::new();
+//
+//     original_stones.iter().for_each(|stone| {
+//         let stone_str = stone.to_string();
+//         let len = stone_str.len();
+//
+//         if *stone == 0 {
+//             stones.push(1);
+//         } else if len % 2 == 0 {
+//             let parts = stone_str.split_at(len / 2);
+//             stones.push(parts.0.parse::<u64>().expect("should parse"));
+//             stones.push(parts.1.parse::<u64>().expect("should parse"));
+//         } else {
+//             stones.push(stone * 2024);
+//         }
+//     });
+//
+//     return stones;
+// }
