@@ -182,7 +182,7 @@ fn main() {
         }
     }
 
-    println!("Score of E: {}", result);
+    println!("Part1: {}", result);
 
     let end_node = all_nodes
         .iter()
@@ -215,9 +215,9 @@ fn main() {
         graph[bench.1][bench.0] = -2;
     }
 
-    print_graph(&graph);
+    // print_graph(&graph);
 
-    println!("Benches: {:?}", on_path.len());
+    println!("Part2: {:?}", on_path.len());
 }
 
 fn walk(all_nodes: &Vec<Node>, node: (usize, usize, Dir, i32), on_path: &mut Vec<(usize, usize)>) {
